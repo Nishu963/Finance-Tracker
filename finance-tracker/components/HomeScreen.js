@@ -7,11 +7,12 @@ import {
   Alert,
   RefreshControl,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
-import { Screen } from "./Shared"; 
+import { Screen } from "./Shared";
 import ExpenseItem from "../components/ExpenseItem";
 import { useApp } from "../context/AppProvider";
 import { currency } from "../Utils/format";
@@ -39,9 +40,7 @@ export default function HomeScreen() {
   const filtered = useMemo(() => {
     let list = [...expenses];
 
-    if (filterCat !== "all") {
-      list = list.filter((e) => e.categoryId === filterCat);
-    }
+    if (filterCat !== "all") list = list.filter((e) => e.categoryId === filterCat);
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -100,9 +99,7 @@ export default function HomeScreen() {
   const monthlyByCat = useMemo(() => {
     const cats = Object.fromEntries(categories.map((c) => [c.id, 0]));
     expenses.forEach((e) => {
-      if (isThisMonth(e.date)) {
-        cats[e.categoryId] = (cats[e.categoryId] || 0) + e.amount;
-      }
+      if (isThisMonth(e.date)) cats[e.categoryId] = (cats[e.categoryId] || 0) + e.amount;
     });
     const total = Object.values(cats).reduce((a, b) => a + b, 0) || 1;
     return categories
@@ -126,116 +123,113 @@ export default function HomeScreen() {
   };
 
   return (
-    <Screen
-      title="Overview"
-      right={<MaterialIcons name="analytics" size={24} color="#2563eb" />}
-    >
-      <View style={styles.section}>
-        <Text style={styles.cardTitle}>Totals</Text>
-        <View style={styles.totalsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statLbl}>Today</Text>
-            <Text style={styles.statVal}>{currency(totals.today)}</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statLbl}>This Week</Text>
-            <Text style={styles.statVal}>{currency(totals.week)}</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statLbl}>This Month</Text>
-            <Text style={styles.statVal}>{currency(totals.month)}</Text>
-          </View>
-        </View>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.cardTitle}>Filters</Text>
-        <View style={styles.inputWrap}>
-          <Ionicons name="search" size={18} color="#666" style={{ marginRight: 6 }} />
-          <TextInput
-            placeholder="Search by note or category"
-            placeholderTextColor="#888"
-            value={search}
-            onChangeText={setSearch}
-            style={styles.input}
+    <Screen title="Overview" right={<MaterialIcons name="analytics" size={24} color="#2563eb" />} style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            tintColor="#2563eb"
+            colors={["#2563eb"]}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
           />
-        </View>
-
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={filterCat} onValueChange={setFilterCat}>
-            <Picker.Item label="All" value="all" />
-            {categories.map((c) => (
-              <Picker.Item key={c.id} label={`${c.emoji} ${c.name}`} value={c.id} />
-            ))}
-          </Picker>
-        </View>
-
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={sortBy} onValueChange={setSortBy}>
-            <Picker.Item label="Latest first" value="latest" />
-            <Picker.Item label="Oldest first" value="oldest" />
-            <Picker.Item label="Highest amount" value="high" />
-            <Picker.Item label="Lowest amount" value="low" />
-          </Picker>
-        </View>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.cardTitle}>Category Breakdown (This Month)</Text>
-        {monthlyByCat.length === 0 ? (
-          <Text style={{ color: "#666" }}>No expenses this month yet.</Text>
-        ) : (
-          <View style={{ gap: 10 }}>
-            {monthlyByCat.map((c) => (
-              <View key={c.id} style={{ gap: 6 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  <Text style={styles.breakLbl}>
-                    {c.emoji} {c.name}
-                  </Text>
-                  <Text style={styles.breakVal}>
-                    {currency(c.amount)} • {c.pct.toFixed(0)}%
-                  </Text>
-                </View>
-                <View style={styles.track}>
-                  <View style={[styles.fill, { width: `${Math.max(5, c.pct)}%` }]} />
-                </View>
-              </View>
-            ))}
+        }
+      >
+       
+        <View style={styles.section}>
+          <Text style={styles.cardTitle}>Totals</Text>
+          <View style={styles.totalsRow}>
+            <View style={styles.stat}>
+              <Text style={styles.statLbl}>Today</Text>
+              <Text style={styles.statVal}>{currency(totals.today)}</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statLbl}>This Week</Text>
+              <Text style={styles.statVal}>{currency(totals.week)}</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statLbl}>This Month</Text>
+              <Text style={styles.statVal}>{currency(totals.month)}</Text>
+            </View>
           </View>
-        )}
-      </View>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.cardTitle}>Expenses</Text>
+        <View style={styles.section}>
+          <Text style={styles.cardTitle}>Filters</Text>
+          <View style={styles.inputWrap}>
+            <Ionicons name="search" size={18} color="#666" style={{ marginRight: 6 }} />
+            <TextInput
+              placeholder="Search by note or category"
+              placeholderTextColor="#888"
+              value={search}
+              onChangeText={setSearch}
+              style={styles.input}
+            />
+          </View>
+
+          <View style={styles.pickerWrap}>
+            <Picker selectedValue={filterCat} onValueChange={setFilterCat}>
+              <Picker.Item label="All" value="all" />
+              {categories.map((c) => (
+                <Picker.Item key={c.id} label={`${c.emoji} ${c.name}`} value={c.id} />
+              ))}
+            </Picker>
+          </View>
+
+          <View style={styles.pickerWrap}>
+            <Picker selectedValue={sortBy} onValueChange={setSortBy}>
+              <Picker.Item label="Latest first" value="latest" />
+              <Picker.Item label="Oldest first" value="oldest" />
+              <Picker.Item label="Highest amount" value="high" />
+              <Picker.Item label="Lowest amount" value="low" />
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.cardTitle}>Category Breakdown (This Month)</Text>
+          {monthlyByCat.length === 0 ? (
+            <Text style={{ color: "#666" }}>No expenses this month yet.</Text>
+          ) : (
+            <View style={{ gap: 10 }}>
+              {monthlyByCat.map((c) => (
+                <View key={c.id} style={{ gap: 6 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={styles.breakLbl}>
+                      {c.emoji} {c.name}
+                    </Text>
+                    <Text style={styles.breakVal}>
+                      {currency(c.amount)} • {c.pct.toFixed(0)}%
+                    </Text>
+                  </View>
+                  <View style={styles.track}>
+                    <View style={[styles.fill, { width: `${Math.max(5, c.pct)}%` }]} />
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}
-          refreshControl={
-            <RefreshControl
-              tintColor="#2563eb"
-              colors={["#2563eb"]}
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
           renderSectionHeader={({ section: { title } }) => (
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionText}>{title}</Text>
             </View>
           )}
           renderItem={({ item }) => (
-            <ExpenseItem
-              item={item}
-              catEmoji={catEmoji}
-              catName={catName}
-              onDelete={confirmDelete}
-            />
+            <ExpenseItem item={item} catEmoji={catEmoji} catName={catName} onDelete={confirmDelete} />
           )}
           ListEmptyComponent={
-            <Text style={{ color: "#666", padding: 16 }}>
-              No expenses yet. Add some!
-            </Text>
+            <Text style={{ color: "#666", padding: 16 }}>No expenses yet. Add some!</Text>
           }
+          scrollEnabled={false} 
         />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
