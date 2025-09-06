@@ -52,25 +52,19 @@ export default function SettingsScreen() {
           numColumns={2}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <View
-              style={[
-                styles.catChip,
-                { backgroundColor: pastelColors[index % pastelColors.length] },
-              ]}
-            >
+          renderItem={({ item }) => (
+            <View style={[styles.catChip, { backgroundColor: "#f3f4f6" }]}>
               <Text style={styles.catText}>
                 {item.emoji} {item.name}
               </Text>
             </View>
           )}
           ListEmptyComponent={
-            <Text style={styles.empty}>
-              ✨ No categories yet. Add one above!
-            </Text>
+            <Text style={styles.empty}>✨ No categories yet. Add one above!</Text>
           }
         />
       </View>
+
       <View style={styles.section}>
         <TouchableOpacity style={styles.dangerBtn} onPress={clearAll}>
           <Text style={styles.dangerBtnText}>🗑 Clear All Data</Text>
